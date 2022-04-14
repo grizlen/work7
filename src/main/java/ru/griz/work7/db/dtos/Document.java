@@ -7,12 +7,12 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class DocDTO {
+public class Document {
     private Long id;
     private String type;
     private Date date;
 
-    public DocDTO() {
+    public Document() {
         date = new Date();
     }
 

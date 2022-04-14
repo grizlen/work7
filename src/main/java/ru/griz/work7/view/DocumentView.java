@@ -7,12 +7,12 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import ru.griz.work7.db.dtos.DocDTO;
+import ru.griz.work7.db.dtos.Document;
 import ru.griz.work7.db.dtos.DocItem;
 
-public class DocumentView extends ContentView<DocDTO> {
+public class DocumentView extends ContentView<Document> {
 
-    private DocDTO model;
+    private Document model;
 
     private final HBox headerBox = new HBox();
     private final Label lblId = new Label();
@@ -35,7 +35,7 @@ public class DocumentView extends ContentView<DocDTO> {
         System.out.println("newItem");
     }
 
-    protected void loadModel(DocDTO model) {
+    protected void loadModel(Document model) {
         this.model = model;
         lblId.setText("№ " + model.getId());
         lblDate.setText("от " + model.getDate());
@@ -43,7 +43,7 @@ public class DocumentView extends ContentView<DocDTO> {
 
     @Override
     public void open() {
-        loadModel(new DocDTO());
+        loadModel(new Document());
     }
 
     @Override

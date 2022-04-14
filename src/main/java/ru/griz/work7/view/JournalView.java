@@ -5,13 +5,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import ru.griz.work7.controllers.DocumentsAPI;
-import ru.griz.work7.db.dtos.DocDTO;
+import ru.griz.work7.db.dtos.Document;
 
-public class JournalView extends ContentView<DocDTO> {
+public class JournalView extends ContentView<Document> {
 
     private final DocumentsAPI documentsAPI = DocumentsAPI.instance();
 
-    protected ListView<DocDTO> lvDocs = new ListView<>();
+    protected ListView<Document> lvDocs = new ListView<>();
 
     public JournalView() {
         VBox.setVgrow(lvDocs, Priority.ALWAYS);
@@ -20,7 +20,7 @@ public class JournalView extends ContentView<DocDTO> {
     }
 
     private void lvDocsMouseClicked(MouseEvent mouseEvent) {
-        DocDTO selected = lvDocs.getSelectionModel().getSelectedItem();
+        Document selected = lvDocs.getSelectionModel().getSelectedItem();
         if (mouseEvent.getClickCount() == 2 && selected != null) {
             MainView.instance().setContent(DocumentView.class).loadModel(selected);
         }

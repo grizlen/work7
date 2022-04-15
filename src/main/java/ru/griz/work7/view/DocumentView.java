@@ -16,7 +16,7 @@ public abstract class DocumentView<T> extends ContentView {
     private final HBox headerBox = new HBox();
     protected final Label lblId = new Label();
     protected final Label lblDate = new Label();
-    private final ListView<DocItem> lvItems = new ListView<>();
+    protected final ListView<DocItem> lvItems = new ListView<>();
     private final HBox footerBox = new HBox();
 
     public DocumentView() {
@@ -30,7 +30,7 @@ public abstract class DocumentView<T> extends ContentView {
         getChildren().addAll(headerBox, lvItems, footerBox);
     }
 
-    private void newItem() {
+    protected void newItem() {
         System.out.println("newItem");
     }
 

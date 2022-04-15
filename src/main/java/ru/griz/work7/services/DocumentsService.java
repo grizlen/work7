@@ -77,6 +77,10 @@ public class DocumentsService {
         }
         DocPurchase result = new DocPurchase();
         result.setDocument(modelMapper.map(docEntity, Document.class));
+        List<DocItemEntity> itemEntities = docItemsRepository.findAllByDocId(id);
+        result.setItems(itemEntities.stream()
+                .map(item -> modelMapper.map(item, DocItem.class))
+                .toList());
         return result;
     }
 }

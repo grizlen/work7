@@ -1,4 +1,4 @@
-package ru.griz.work7.db.dtos;
+package ru.griz.work7.models;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class Document {
+    public static final String PURCHASE = "PURCHASE";
     private Long id;
     private String type;
     private Date date;

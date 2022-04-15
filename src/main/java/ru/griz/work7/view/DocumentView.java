@@ -7,16 +7,15 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import ru.griz.work7.db.dtos.Document;
-import ru.griz.work7.db.dtos.DocItem;
+import ru.griz.work7.models.DocItem;
 
-public class DocumentView extends ContentView<Document> {
+public abstract class DocumentView<T> extends ContentView {
 
-    private Document model;
+    protected T model;
 
     private final HBox headerBox = new HBox();
-    private final Label lblId = new Label();
-    private final Label lblDate = new Label();
+    protected final Label lblId = new Label();
+    protected final Label lblDate = new Label();
     private final ListView<DocItem> lvItems = new ListView<>();
     private final HBox footerBox = new HBox();
 
@@ -35,20 +34,11 @@ public class DocumentView extends ContentView<Document> {
         System.out.println("newItem");
     }
 
-    protected void loadModel(Document model) {
-        this.model = model;
-        lblId.setText("№ " + model.getId());
-        lblDate.setText("от " + model.getDate());
-    }
+    protected abstract void loadModel(T model);
 
     @Override
     public void open() {
-        loadModel(new Document());
-    }
-
-    @Override
-    public String getTitle() {
-        return "Документ";
+        loadModel(null);
     }
 
     @Override
@@ -59,12 +49,12 @@ public class DocumentView extends ContentView<Document> {
         };
     }
 
-    private void save() {
+    protected void save() {
         System.out.println("save");
         journal();
     }
 
-    private void journal() {
+    protected void journal() {
         MainView.instance().setContent(JournalView.class);
     }
 }

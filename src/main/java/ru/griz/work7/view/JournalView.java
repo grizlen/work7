@@ -4,14 +4,15 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import ru.griz.work7.controllers.DocumentsAPI;
-import ru.griz.work7.db.dtos.DocDTO;
+import ru.griz.work7.controllers.DocumentsController;
+import ru.griz.work7.models.DocPurchase;
+import ru.griz.work7.models.Document;
 
-public class JournalView extends ContentView<DocDTO> {
+public class JournalView extends ContentView {
 
-    private final DocumentsAPI documentsAPI = DocumentsAPI.instance();
+    private final DocumentsController documentsController = DocumentsController.instance();
 
-    protected ListView<DocDTO> lvDocs = new ListView<>();
+    protected ListView<Document> lvDocs = new ListView<>();
 
     public JournalView() {
         VBox.setVgrow(lvDocs, Priority.ALWAYS);
@@ -19,17 +20,10 @@ public class JournalView extends ContentView<DocDTO> {
         lvDocs.setOnMouseClicked(this::lvDocsMouseClicked);
     }
 
-    private void lvDocsMouseClicked(MouseEvent mouseEvent) {
-        DocDTO selected = lvDocs.getSelectionModel().getSelectedItem();
-        if (mouseEvent.getClickCount() == 2 && selected != null) {
-            MainView.instance().setContent(DocumentView.class).loadModel(selected);
-        }
-    }
-
     @Override
     public void open() {
         lvDocs.getItems().clear();
-        lvDocs.getItems().addAll(documentsAPI.getAll());
+        lvDocs.getItems().addAll(documentsController.getAll());
     }
 
     @Override
@@ -44,7 +38,17 @@ public class JournalView extends ContentView<DocDTO> {
         };
     }
 
+    private void lvDocsMouseClicked(MouseEvent mouseEvent) {
+        Document selected = lvDocs.getSelectionModel().getSelectedItem();
+        if (mouseEvent.getClickCount() == 2 && selected != null) {
+            if (selected.getType().equals(Document.PURCHASE)) {
+                DocPurchase purchase = documentsController.getPurchase(selected.getId());
+                MainView.instance().setContent(DocPurchaseView.class).loadModel(purchase);
+            }
+        }
+    }
+
     private void newDocument() {
-        MainView.instance().setContent(DocumentView.class);
+        MainView.instance().setContent(DocPurchaseView.class);
     }
 }

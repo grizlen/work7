@@ -2,7 +2,8 @@ package ru.griz.work7.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import ru.griz.work7.db.dtos.DocDTO;
+import ru.griz.work7.models.DocPurchase;
+import ru.griz.work7.models.Document;
 import ru.griz.work7.services.DocumentsService;
 
 import javax.annotation.PostConstruct;
@@ -10,11 +11,11 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class DocumentsAPI {
+public class DocumentsController {
 
-    private static DocumentsAPI instance;
+    private static DocumentsController instance;
 
-    public static DocumentsAPI instance() {
+    public static DocumentsController instance() {
         return instance;
     }
 
@@ -26,11 +27,15 @@ public class DocumentsAPI {
         instance = this;
     }
 
-    public List<DocDTO> getAll() {
+    public List<Document> getAll() {
         return documentsService.getAll();
     }
 
-    public DocDTO postPurchase() {
-        return documentsService.newPurchase();
+    public DocPurchase getPurchase(Long id) {
+        return documentsService.getPurchase(id);
+    }
+
+    public DocPurchase SavePurchase(DocPurchase doc) {
+        return documentsService.SavePurchase(doc);
     }
 }

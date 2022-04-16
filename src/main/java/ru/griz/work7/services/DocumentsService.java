@@ -1,9 +1,11 @@
 package ru.griz.work7.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.griz.work7.db.entities.DocItemEntity;
 import ru.griz.work7.db.entities.DocPurchaseEntity;
 import ru.griz.work7.db.repositories.DocItemsRepository;
@@ -15,11 +17,10 @@ import ru.griz.work7.db.entities.DocEntity;
 import ru.griz.work7.db.repositories.DocumentsRepository;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DocumentsService {
 
     private final DocumentsRepository documentsRepository;
@@ -35,52 +36,96 @@ public class DocumentsService {
         return dtoList;
     }
 
+    @Transactional
     public DocPurchase SavePurchase(DocPurchase doc) {
-        Long id = doc.getDocument().getId();
-        if (id != null) {
-            docItemsRepository.deleteAllByDocId(id);
+        clearDocItems(doc);
+        saveDocumentEntity(doc);
+        savePurchaseEntity(doc);
+        saveDocItems(doc);
+        return doc;
+    }
+
+    private void clearDocItems(DocPurchase doc) {
+        log.info("Clear items for purchase id {}", doc.getDocument().getId());
+        if (doc.getDocument().getId() != null) {
+            docItemsRepository.deleteAllByDocId(doc.getDocument().getId());
         }
+    }
+
+    private void saveDocumentEntity(DocPurchase doc) {
+        log.info("save document entity for purchase id {}", doc.getDocument().getId());
         DocEntity docEntity = new DocEntity();
-        docEntity.setId(id);
+        docEntity.setId(doc.getDocument().getId());
         docEntity.setDate(doc.getDocument().getDate());
         docEntity.setType("PURCHASE");
-        DocEntity savedDoc = documentsRepository.save(docEntity);
-        id = docEntity.getId();
+        doc.getDocument().setId(documentsRepository.save(docEntity).getId());
+    }
+
+    private void savePurchaseEntity(DocPurchase doc) {
+        log.info("save entity for purchase id {}", doc.getDocument().getId());
         DocPurchaseEntity purchaseEntity = new DocPurchaseEntity();
-        purchaseEntity.setId(id);
+        purchaseEntity.setId(doc.getDocument().getId());
         DocPurchaseEntity savedPurchase = docPurchaseRepository.save(purchaseEntity);
-        Long finalId = id;
-        List<DocItemEntity> itemEntities = doc.getItems().stream()
-                .peek(item -> {
-                    item.setId(null);
-                    item.setDocId(finalId);
+    }
+
+    private void saveDocItems(DocPurchase doc) {
+        log.info("save document items for purchase id {}", doc.getDocument().getId());
+        List<DocItemEntity> entities = doc.getItems().stream()
+                .map(item -> {
+                    DocItemEntity entity = new DocItemEntity();
+                    entity.setId(null);
+                    entity.setDocId(doc.getDocument().getId());
+                    return entity;
                 })
-                .map(item -> modelMapper.map(item, DocItemEntity.class))
                 .toList();
-        List<DocItem> docItems = docItemsRepository.saveAll(itemEntities).stream()
-                .map(entity -> modelMapper.map(entity, DocItem.class))
+        List<DocItemEntity> savedEntities = docItemsRepository.saveAll(entities);
+        List<DocItem> items = savedEntities.stream()
+                .map(entity -> {
+                    DocItem item = new DocItem();
+                    item.setId(entity.getId());
+                    return item;
+                })
                 .toList();
-        DocPurchase result = new DocPurchase();
-        result.setDocument(modelMapper.map(savedDoc, Document.class));
-        result.setItems(docItems);
-        return result;
+        doc.setItems(items);
     }
 
     public DocPurchase getPurchase(Long id) {
-        DocPurchaseEntity entity = docPurchaseRepository.findById(id).orElse(null);
-        if (entity == null) {
+        DocEntity documentEntity = getDocumentEntity(id);
+        if (documentEntity == null) {
             return null;
         }
-        Optional<DocEntity> docEntity = documentsRepository.findById(entity.getId());
-        if (docEntity == null) {
+        DocPurchaseEntity purchaseEntity = getPurchaseEntity(id);
+        if (purchaseEntity == null) {
             return null;
         }
+        List<DocItemEntity> itemEntities = getDocItemEntities(id);
+        List<DocItem> items = itemEntities.stream()
+                .map(entity -> {
+                    DocItem item = new DocItem();
+                    item.setId(entity.getId());
+                    return item;
+                })
+                .toList();
         DocPurchase result = new DocPurchase();
-        result.setDocument(modelMapper.map(docEntity, Document.class));
-        List<DocItemEntity> itemEntities = docItemsRepository.findAllByDocId(id);
-        result.setItems(itemEntities.stream()
-                .map(item -> modelMapper.map(item, DocItem.class))
-                .toList());
+        result.getDocument().setId(documentEntity.getId());
+        result.getDocument().setDate(documentEntity.getDate());
+        result.getDocument().setType(documentEntity.getType());
+        result.setItems(items);
         return result;
+    }
+
+    private DocEntity getDocumentEntity(Long id) {
+        log.info("get document entity for id {}" ,id);
+        return documentsRepository.findById(id).orElse(null);
+    }
+
+    private DocPurchaseEntity getPurchaseEntity(Long id) {
+        log.info("get purchase entity for id {}" ,id);
+        return docPurchaseRepository.findById(id).orElse(null);
+    }
+
+    private List<DocItemEntity> getDocItemEntities(Long id) {
+        log.info("get document items for id {}" ,id);
+        return docItemsRepository.findAllByDocId(id);
     }
 }

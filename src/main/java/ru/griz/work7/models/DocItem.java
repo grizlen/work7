@@ -7,5 +7,11 @@ import lombok.Setter;
 @Setter
 public class DocItem {
     private Long id;
-    private Long docId;
+
+    @Override
+    public String toString() {
+        return "DocItem{" +
+                "id=" + id +
+                '}';
+    }
 }
